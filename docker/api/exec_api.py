@@ -2,11 +2,13 @@ import six
 
 from .. import errors
 from .. import utils
+from .. import objects
 
 
 class ExecApiMixin(object):
     @utils.minimum_version('1.15')
     @utils.check_resource
+    @objects.rebind_container
     def exec_create(self, container, cmd, stdout=True, stderr=True,
                     stdin=False, tty=False, privileged=False, user=''):
         if privileged and utils.compare_version('1.19', self._version) < 0:
