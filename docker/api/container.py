@@ -5,10 +5,12 @@ from datetime import datetime
 from .. import errors
 from .. import utils
 from ..utils.utils import create_networking_config, create_endpoint_config
+from .. import objects
 
 
 class ContainerApiMixin(object):
     @utils.check_resource
+    @objects.rebind_container
     def attach(self, container, stdout=True, stderr=True,
                stream=False, logs=False):
         params = {
@@ -23,6 +25,7 @@ class ContainerApiMixin(object):
         return self._get_result(container, stream, response)
 
     @utils.check_resource
+    @objects.rebind_container
     def attach_socket(self, container, params=None, ws=False):
         if params is None:
             params = {
@@ -39,6 +42,7 @@ class ContainerApiMixin(object):
             u, None, params=self._attach_params(params), stream=True))
 
     @utils.check_resource
+    @objects.rebind_container
     def commit(self, container, repository=None, tag=None, message=None,
                author=None, changes=None, conf=None):
         params = {
@@ -77,6 +81,7 @@ class ContainerApiMixin(object):
         return res
 
     @utils.check_resource
+    @objects.rebind_container
     def copy(self, container, resource):
         if utils.version_gte(self._version, '1.20'):
             warnings.warn(
@@ -127,8 +132,9 @@ class ContainerApiMixin(object):
         params = {
             'name': name
         }
-        res = self._post_json(u, data=config, params=params)
-        return self._result(res, True)
+        response = self._post_json(u, data=config, params=params)
+        result = self._result(response, True)
+        return objects.Container(self, result)
 
     def create_host_config(self, *args, **kwargs):
         if not kwargs:
@@ -148,12 +154,14 @@ class ContainerApiMixin(object):
         return create_endpoint_config(self._version, *args, **kwargs)
 
     @utils.check_resource
+    @objects.rebind_container
     def diff(self, container):
         return self._result(
             self._get(self._url("/containers/{0}/changes", container)), True
         )
 
     @utils.check_resource
+    @objects.rebind_container
     def export(self, container):
         res = self._get(
             self._url("/containers/{0}/export", container), stream=True
@@ -163,6 +171,7 @@ class ContainerApiMixin(object):
 
     @utils.check_resource
     @utils.minimum_version('1.20')
+    @objects.rebind_container
     def get_archive(self, container, path):
         params = {
             'path': path
@@ -177,12 +186,14 @@ class ContainerApiMixin(object):
         )
 
     @utils.check_resource
+    @objects.rebind_container
     def inspect_container(self, container):
         return self._result(
             self._get(self._url("/containers/{0}/json", container)), True
         )
 
     @utils.check_resource
+    @objects.rebind_container
     def kill(self, container, signal=None):
         url = self._url("/containers/{0}/kill", container)
         params = {}
@@ -193,6 +204,7 @@ class ContainerApiMixin(object):
         self._raise_for_status(res)
 
     @utils.check_resource
+    @objects.rebind_container
     def logs(self, container, stdout=True, stderr=True, stream=False,
              timestamps=False, tail='all', since=None, follow=None):
         if utils.compare_version('1.11', self._version) >= 0:
@@ -230,12 +242,14 @@ class ContainerApiMixin(object):
         )
 
     @utils.check_resource
+    @objects.rebind_container
     def pause(self, container):
         url = self._url('/containers/{0}/pause', container)
         res = self._post(url)
         self._raise_for_status(res)
 
     @utils.check_resource
+    @objects.rebind_container
     def port(self, container, private_port):
         res = self._get(self._url("/containers/{0}/json", container))
         self._raise_for_status(res)
@@ -260,6 +274,7 @@ class ContainerApiMixin(object):
 
     @utils.check_resource
     @utils.minimum_version('1.20')
+    @objects.rebind_container
     def put_archive(self, container, path, data):
         params = {'path': path}
         url = self._url('/containers/{0}/archive', container)
@@ -268,6 +283,7 @@ class ContainerApiMixin(object):
         return res.status_code == 200
 
     @utils.check_resource
+    @objects.rebind_container
     def remove_container(self, container, v=False, link=False, force=False):
         params = {'v': v, 'link': link, 'force': force}
         res = self._delete(
@@ -277,6 +293,7 @@ class ContainerApiMixin(object):
 
     @utils.minimum_version('1.17')
     @utils.check_resource
+    @objects.rebind_container
     def rename(self, container, name):
         url = self._url("/containers/{0}/rename", container)
         params = {'name': name}
@@ -284,6 +301,7 @@ class ContainerApiMixin(object):
         self._raise_for_status(res)
 
     @utils.check_resource
+    @objects.rebind_container
     def resize(self, container, height, width):
         params = {'h': height, 'w': width}
         url = self._url("/containers/{0}/resize", container)
@@ -291,6 +309,7 @@ class ContainerApiMixin(object):
         self._raise_for_status(res)
 
     @utils.check_resource
+    @objects.rebind_container
     def restart(self, container, timeout=10):
         params = {'t': timeout}
         url = self._url("/containers/{0}/restart", container)
@@ -298,6 +317,7 @@ class ContainerApiMixin(object):
         self._raise_for_status(res)
 
     @utils.check_resource
+    @objects.rebind_container
     def start(self, container, binds=None, port_bindings=None, lxc_conf=None,
               publish_all_ports=None, links=None, privileged=None,
               dns=None, dns_search=None, volumes_from=None, network_mode=None,
@@ -367,6 +387,7 @@ class ContainerApiMixin(object):
 
     @utils.minimum_version('1.17')
     @utils.check_resource
+    @objects.rebind_container
     def stats(self, container, decode=None, stream=True):
         url = self._url("/containers/{0}/stats", container)
         if stream:
@@ -377,6 +398,7 @@ class ContainerApiMixin(object):
                                 json=True)
 
     @utils.check_resource
+    @objects.rebind_container
     def stop(self, container, timeout=10):
         params = {'t': timeout}
         url = self._url("/containers/{0}/stop", container)
@@ -386,6 +408,7 @@ class ContainerApiMixin(object):
         self._raise_for_status(res)
 
     @utils.check_resource
+    @objects.rebind_container
     def top(self, container, ps_args=None):
         u = self._url("/containers/{0}/top", container)
         params = {}
@@ -394,6 +417,7 @@ class ContainerApiMixin(object):
         return self._result(self._get(u, params=params), True)
 
     @utils.check_resource
+    @objects.rebind_container
     def unpause(self, container):
         url = self._url('/containers/{0}/unpause', container)
         res = self._post(url)
@@ -401,6 +425,7 @@ class ContainerApiMixin(object):
 
     @utils.minimum_version('1.22')
     @utils.check_resource
+    @objects.rebind_container
     def update_container(
         self, container, blkio_weight=None, cpu_period=None, cpu_quota=None,
         cpu_shares=None, cpuset_cpus=None, cpuset_mems=None, mem_limit=None,
@@ -433,6 +458,7 @@ class ContainerApiMixin(object):
         return self._result(res, True)
 
     @utils.check_resource
+    @objects.rebind_container
     def wait(self, container, timeout=None):
         url = self._url("/containers/{0}/wait", container)
         res = self._post(url, timeout=timeout)

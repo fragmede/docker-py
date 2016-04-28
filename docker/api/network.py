@@ -3,6 +3,7 @@ import json
 from ..errors import InvalidVersion
 from ..utils import check_resource, minimum_version, normalize_links
 from ..utils import version_lt
+from .. import objects
 
 
 class NetworkApiMixin(object):
@@ -51,6 +52,7 @@ class NetworkApiMixin(object):
 
     @check_resource
     @minimum_version('1.21')
+    @objects.rebind_container
     def connect_container_to_network(self, container, net_id,
                                      ipv4_address=None, ipv6_address=None,
                                      aliases=None, links=None):
@@ -82,6 +84,7 @@ class NetworkApiMixin(object):
 
     @check_resource
     @minimum_version('1.21')
+    @objects.rebind_container
     def disconnect_container_from_network(self, container, net_id):
         data = {"container": container}
         url = self._url("/networks/{0}/disconnect", net_id)
