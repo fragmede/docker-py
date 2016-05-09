@@ -25,20 +25,3 @@ class Container(LegacyContainerMixin, object):
     def __init__(self, docker, container_info):
         self._docker = docker
         self._info = container_info
-
-    def run(self):
-        self._docker.start(self._info.get('Id'))
-        return self
-
-    def destroy(self):
-        try:
-            self._docker.kill(self._info['Id'])
-        except docker.errors.APIError:
-            pass
-        self._docker.remove_container(self._info['Id'])
-
-    def __enter__(self):
-        return self.run()
-
-    def __exit__(self, type, value, traceback):
-        self.destroy()
