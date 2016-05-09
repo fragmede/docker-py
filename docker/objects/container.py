@@ -16,6 +16,7 @@ class LegacyContainerMixin(object):
 
     def __contains__(self, obj):
         return obj in self._info
+
     def get(self, obj, default=None):
         if default:
             return self._info.get(obj, default)
