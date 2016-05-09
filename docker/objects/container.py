@@ -43,12 +43,6 @@ class Container(LegacyContainerMixin, object):
     def __exit__(self, type, value, traceback):
         self.destroy()
 
-    def ip(self):
-        cont_info = self._docker.inspect_container(self._info)
-        nets = cont_info['NetworkSettings']['Networks'].items()
-        assert len(nets) == 1
-        return nets[0]['IPAddress']
-
     def _exec(self, cmd, output=False, detach=False):
         exec_info = self._docker.exec_create(self._info['Id'], cmd)
         if output:
