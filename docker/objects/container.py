@@ -42,16 +42,3 @@ class Container(LegacyContainerMixin, object):
 
     def __exit__(self, type, value, traceback):
         self.destroy()
-
-    def _exec(self, cmd, output=False, detach=False):
-        exec_info = self._docker.exec_create(self._info['Id'], cmd)
-        if output:
-            stream = docker_sock.exec_start(exec_info.get('Id'), stream=True)
-            for x in stream:
-                print x,
-        else:
-            docker_sock.exec_start(exec_info.get('Id'), detach=detach)
-
-        if not detach:
-            return docker_sock.exec_inspect(exec_info['Id'])['ExitCode']
-
