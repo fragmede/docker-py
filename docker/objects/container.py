@@ -22,7 +22,7 @@ class LegacyContainerMixin(object):
             return self._info.get(obj, default)
         return self._info.get(obj)
 
-class Container(LegacyContainerMixin, object):
+class Container(LegacyContainerMixin):
     def __init__(self, docker, container_info):
         self._docker = docker
         self._info = container_info
