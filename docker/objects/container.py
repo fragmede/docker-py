@@ -10,23 +10,32 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-class Container(object):
+class LegacyContainerMixin(object):
+    def __getitem__(self, obj):
+        return self._info[obj]
+
+    def __contains__(self, obj):
+        return obj in self._info
+    def get(self, obj, default=None):
+        if default:
+            return self._info.get(obj, default)
+        return self._info.get(obj)
+
+class Container(LegacyContainerMixin, object):
     def __init__(self, docker, container_info):
         self._docker = docker
         self._info = container_info
 
     def run(self):
-        self._cont = self._docker.create_container(**self._info)
-        self._docker.start(self._cont.get('Id'))
-        #return self._cont
+        self._docker.start(self._info.get('Id'))
         return self
 
     def destroy(self):
         try:
-            self._docker.kill(self._cont['Id'])
+            self._docker.kill(self._info['Id'])
         except docker.errors.APIError:
             pass
-        self._docker.remove_container(self._cont['Id'])
+        self._docker.remove_container(self._info['Id'])
 
     def __enter__(self):
         return self.run()
@@ -35,13 +44,13 @@ class Container(object):
         self.destroy()
 
     def ip(self):
-        cont_info = self._docker.inspect_container(self._cont)
+        cont_info = self._docker.inspect_container(self._info)
         nets = cont_info['NetworkSettings']['Networks'].items()
         assert len(nets) == 1
         return nets[0]['IPAddress']
 
     def _exec(self, cmd, output=False, detach=False):
-        exec_info = self._docker.exec_create(self._cont['Id'], cmd)
+        exec_info = self._docker.exec_create(self._info['Id'], cmd)
         if output:
             stream = docker_sock.exec_start(exec_info.get('Id'), stream=True)
             for x in stream:
@@ -51,11 +60,4 @@ class Container(object):
 
         if not detach:
             return docker_sock.exec_inspect(exec_info['Id'])['ExitCode']
-    
-    def __getitem__(self, obj):
-        return self._info[obj]
 
-    def __contains__(self, obj):
-        return obj in self._info
-
-    #def __repr__(self):
