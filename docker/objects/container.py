@@ -10,7 +10,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-class LegacyContainerMixin(object):
+class LegacyInfoMixin(object):
+    def __init__(self, info):
+        self._info = info
+
     def __getitem__(self, obj):
         return self._info[obj]
 
@@ -22,10 +25,10 @@ class LegacyContainerMixin(object):
             return self._info.get(obj, default)
         return self._info.get(obj)
 
-class Container(LegacyContainerMixin):
+class Container(LegacyInfoMixin):
     def __init__(self, docker, container_info):
         self._docker = docker
-        self._info = container_info
+        super(Container, self).__init__(container_info)
 
     def run(self):
         self._docker.start(self._info.get('Id'))
