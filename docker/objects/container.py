@@ -46,3 +46,15 @@ class Container(LegacyInfoMixin):
 
     def __exit__(self, type, value, traceback):
         self.destroy()
+
+    def exec_create(self, cmd, **kwargs):
+        exec_info = self._docker.exec_create(self._info['Id'], cmd, **kwargs)
+        return Exec(self._docker, exec_info)
+
+class Exec(LegacyInfoMixin):
+    def __init__(self, docker, exec_info):
+        self._docker = docker
+        super(Exec, self).__init__(exec_info)
+
+    def run(self, **kwargs):
+        return self._docker.exec_start(self._info.get('Id'), **kwargs)
