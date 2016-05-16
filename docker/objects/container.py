@@ -56,5 +56,5 @@ class Exec(LegacyInfoMixin):
         self._docker = docker
         super(Exec, self).__init__(exec_info)
 
-    def run(self, **kwargs):
+    def start(self, **kwargs):
         return self._docker.exec_start(self._info.get('Id'), **kwargs)
