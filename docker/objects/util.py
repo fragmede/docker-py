@@ -15,6 +15,6 @@ from .container import Container
 def rebind_container(func):
     def func_with_cont_obj(self, cont_obj, *args, **kwargs):
         if isinstance(cont_obj, Container):
-            return func(self, cont_obj['Id'], *args, **kwargs)  
-        return func(self, cont_obj, *args, **kwargs)  
+            return func(self, cont_obj['Id'], *args, **kwargs)
+        return func(self, cont_obj, *args, **kwargs)
     return func_with_cont_obj
