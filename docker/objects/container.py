@@ -10,6 +10,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+from .. import errors
+
 class LegacyInfoMixin(object):
     def __init__(self, info):
         self._info = info
@@ -37,7 +39,7 @@ class Container(LegacyInfoMixin):
     def destroy(self):
         try:
             self._docker.kill(self._info['Id'])
-        except docker.errors.APIError:
+        except errors.APIError:
             pass
         self._docker.remove_container(self._info['Id'])
 
